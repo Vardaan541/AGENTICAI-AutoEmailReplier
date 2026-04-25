@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "187775668985-6s79v568er4cc69sb598obdr6ksscsar.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.email_agentic_ai_app",
+            "certificate_hash": "82295b5de9f2604986db7392ce3124920ea8372e"
+          }
+        },
+        {
           "client_id": "187775668985-9bno36ui5uitu1hkjdcdrubr1ie9l9n1.apps.googleusercontent.com",
           "client_type": 3
         }

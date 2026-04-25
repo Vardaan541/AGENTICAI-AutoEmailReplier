@@ -6,6 +6,7 @@ Polling loop:
 """
 
 import time
+from typing import Optional
 
 from app.config import settings
 from app.db import email_exists, save_email_record
@@ -14,12 +15,16 @@ from app.openai_client import classify_email, extract_context, generate_reply
 from app.safety import is_sensitive_email
 
 
-def process_incoming_emails() -> int:
+def process_incoming_emails(
+    owner_uid: str = "",
+    owner_email: str = "",
+    token_info: Optional[dict] = None,
+) -> int:
     """
     One polling cycle.
     Returns number of newly processed emails.
     """
-    unread = fetch_unread_emails(max_results=5)
+    unread = fetch_unread_emails(max_results=5, token_info=token_info)
     new_count = 0
 
     for email in unread:
@@ -45,6 +50,8 @@ def process_incoming_emails() -> int:
             save_email_record(
                 {
                     **email,
+                    "owner_uid": owner_uid,
+                    "owner_email": owner_email,
                     "classification": classification,
                     "intent": context["intent"],
                     "urgency": context["urgency"],

@@ -9,6 +9,9 @@ Includes:
 import base64
 import json
 from email.mime.text import MIMEText
+from typing import Optional
+from urllib.parse import urlencode
+from urllib.request import Request as UrlRequest, urlopen
 
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
@@ -65,6 +68,70 @@ def get_gmail_service():
     return build("gmail", "v1", credentials=creds)
 
 
+def get_gmail_service_for_user_token(token_info: dict):
+    """
+    Build Gmail service using a user-specific token.
+    Supports access-token-only mode and refresh-token mode.
+    """
+    access_token = (token_info.get("access_token") or "").strip()
+    if not access_token:
+        raise ValueError("Missing user Gmail access token.")
+
+    refresh_token = (token_info.get("refresh_token") or "").strip()
+    if refresh_token:
+        creds = Credentials(
+            token=access_token,
+            refresh_token=refresh_token,
+            token_uri=token_info.get("token_uri") or "https://oauth2.googleapis.com/token",
+            client_id=token_info.get("client_id") or None,
+            client_secret=token_info.get("client_secret") or None,
+            scopes=SCOPES,
+        )
+    else:
+        creds = Credentials(token=access_token, scopes=SCOPES)
+    return build("gmail", "v1", credentials=creds)
+
+
+def exchange_auth_code_for_tokens(server_auth_code: str) -> dict:
+    """
+    Exchange one-time Google server auth code for access/refresh tokens.
+    Requires GMAIL_WEB_CLIENT_ID and GMAIL_WEB_CLIENT_SECRET in backend env.
+    """
+    client_id = settings.gmail_web_client_id.strip()
+    client_secret = settings.gmail_web_client_secret.strip()
+    if not client_id or not client_secret:
+        raise ValueError("Missing GMAIL_WEB_CLIENT_ID or GMAIL_WEB_CLIENT_SECRET.")
+
+    payload = urlencode(
+        {
+            "code": server_auth_code,
+            "client_id": client_id,
+            "client_secret": client_secret,
+            "redirect_uri": "postmessage",
+            "grant_type": "authorization_code",
+        }
+    ).encode("utf-8")
+
+    req = UrlRequest(
+        url="https://oauth2.googleapis.com/token",
+        data=payload,
+        headers={"Content-Type": "application/x-www-form-urlencoded"},
+        method="POST",
+    )
+    with urlopen(req, timeout=20) as resp:
+        raw = resp.read().decode("utf-8")
+    token_response = json.loads(raw)
+    return {
+        "access_token": token_response.get("access_token", ""),
+        "refresh_token": token_response.get("refresh_token", ""),
+        "token_uri": token_response.get("token_uri", "https://oauth2.googleapis.com/token"),
+        "client_id": client_id,
+        "client_secret": client_secret,
+        "scopes": token_response.get("scope", ""),
+        "expiry": "",
+    }
+
+
 def _extract_header(headers: list[dict], key: str) -> str:
     for h in headers:
         if h.get("name", "").lower() == key.lower():
@@ -88,9 +155,9 @@ def _decode_body(payload: dict) -> str:
     return ""
 
 
-def fetch_unread_emails(max_results: int = 5) -> list[dict]:
+def fetch_unread_emails(max_results: int = 5, token_info: Optional[dict] = None) -> list[dict]:
     """Fetch a small batch of unread emails."""
-    service = get_gmail_service()
+    service = get_gmail_service_for_user_token(token_info) if token_info else get_gmail_service()
     response = (
         service.users()
         .messages()
@@ -117,9 +184,15 @@ def fetch_unread_emails(max_results: int = 5) -> list[dict]:
     return parsed_emails
 
 
-def send_reply(thread_id: str, to_address: str, subject: str, body: str) -> None:
+def send_reply(
+    thread_id: str,
+    to_address: str,
+    subject: str,
+    body: str,
+    token_info: Optional[dict] = None,
+) -> None:
     """Send email reply using Gmail API."""
-    service = get_gmail_service()
+    service = get_gmail_service_for_user_token(token_info) if token_info else get_gmail_service()
     mime_message = MIMEText(body)
     mime_message["to"] = to_address
     mime_message["subject"] = f"Re: {subject}"

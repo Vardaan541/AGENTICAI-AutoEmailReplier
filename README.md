@@ -404,6 +404,8 @@ pip install -r requirements.txt
 2. Add this in `.env`:
 ```bash
 FIREBASE_SERVICE_ACCOUNT_FILE=firebase-service-account.json
+GMAIL_WEB_CLIENT_ID=<google_oauth_web_client_id>
+GMAIL_WEB_CLIENT_SECRET=<google_oauth_web_client_secret>
 ```
 3. Download Firebase service account JSON for project `email-agentic-ai` and place it at project root as `firebase-service-account.json`.
 4. Start API:
@@ -423,6 +425,12 @@ flutter pub get
 4. Run app with API URL:
 ```bash
 flutter run --dart-define=API_BASE_URL=http://127.0.0.1:8000
+```
+For long-lived per-user Gmail access (refresh token exchange), also pass Google OAuth web client id:
+```bash
+flutter run \
+  --dart-define=API_BASE_URL=http://127.0.0.1:8000 \
+  --dart-define=GOOGLE_SERVER_CLIENT_ID=<google_oauth_web_client_id>
 ```
 
 ### How it works now

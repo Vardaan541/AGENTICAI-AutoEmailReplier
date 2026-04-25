@@ -23,6 +23,8 @@ class Settings:
     gmail_token_file: str = os.getenv("GMAIL_TOKEN_FILE", "token.json")
     gmail_credentials_json: str = os.getenv("GMAIL_CREDENTIALS_JSON", "")
     gmail_token_json: str = os.getenv("GMAIL_TOKEN_JSON", "")
+    gmail_web_client_id: str = os.getenv("GMAIL_WEB_CLIENT_ID", "")
+    gmail_web_client_secret: str = os.getenv("GMAIL_WEB_CLIENT_SECRET", "")
 
     # Polling behavior
     poll_interval_seconds: int = int(os.getenv("POLL_INTERVAL_SECONDS", "30"))

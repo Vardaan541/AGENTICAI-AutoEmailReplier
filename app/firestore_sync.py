@@ -67,7 +67,11 @@ def sync_approval_status(gmail_message_id: str, status: str, edited_reply: Optio
     client.collection(COLLECTION_NAME).document(gmail_message_id).set(payload, merge=True)
 
 
-def list_firestore_emails(status: Optional[str] = None, limit: int = 100) -> list[dict]:
+def list_firestore_emails(
+    status: Optional[str] = None,
+    limit: int = 100,
+    owner_uid: Optional[str] = None,
+) -> list[dict]:
     """
     Read email records from Firestore.
     Returns empty list if Firestore is not configured.
@@ -79,6 +83,8 @@ def list_firestore_emails(status: Optional[str] = None, limit: int = 100) -> lis
     query = client.collection(COLLECTION_NAME)
     if status:
         query = query.where("approval_status", "==", status)
+    if owner_uid:
+        query = query.where("owner_uid", "==", owner_uid)
 
     docs = query.stream()
     rows = [doc.to_dict() for doc in docs if doc.exists]
@@ -86,12 +92,15 @@ def list_firestore_emails(status: Optional[str] = None, limit: int = 100) -> lis
     return rows[:limit]
 
 
-def get_firestore_email_by_local_id(email_id: int) -> Optional[dict]:
+def get_firestore_email_by_local_id(email_id: int, owner_uid: Optional[str] = None) -> Optional[dict]:
     """Fetch one email from Firestore using local numeric id."""
     client = _firestore_client()
     if client is None:
         return None
-    query = client.collection(COLLECTION_NAME).where("id", "==", email_id).limit(1)
+    query = client.collection(COLLECTION_NAME).where("id", "==", email_id)
+    if owner_uid:
+        query = query.where("owner_uid", "==", owner_uid)
+    query = query.limit(1)
     docs = list(query.stream())
     if not docs:
         return None
