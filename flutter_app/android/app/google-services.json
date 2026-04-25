@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "187775668985",
+    "project_id": "email-agentic-ai-7fc11",
+    "storage_bucket": "email-agentic-ai-7fc11.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:187775668985:android:35ae98ab832ac6c0678828",
+        "android_client_info": {
+          "package_name": "com.example.email_agentic_ai_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "187775668985-9bno36ui5uitu1hkjdcdrubr1ie9l9n1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDN4O-v-HV_eJxP5vsSUGm1R1iI34PpgHg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "187775668985-9bno36ui5uitu1hkjdcdrubr1ie9l9n1.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

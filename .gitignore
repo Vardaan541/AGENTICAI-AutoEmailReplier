@@ -1,0 +1,9 @@
+.env
+token.json
+credentials.json
+firebase-service-account.json
+email-agentic-ai-*-firebase-adminsdk-*.json
+*.db
+__pycache__/
+.venv/
+.poll_job_secret
